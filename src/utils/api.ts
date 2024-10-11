@@ -39,3 +39,22 @@ export const searchPhotos = async (query: string, page: number, perPage: number)
 	}
 };
 
+export const getPhotoById = async (id: string): Promise<Photo | null> => {
+	try {
+		const response = await fetch(`${BASE_URL}/photos/${id}`,
+			{
+				headers: {
+					Authorization: API_KEY
+				},
+			}
+		);
+		if (!response.ok) {
+			throw new Error('Failed to search photos');
+		}
+		const data = await response.json();
+		return data;
+	} catch (error) {
+		console.log('Error searching photos:', error)
+		return null
+	}
+}

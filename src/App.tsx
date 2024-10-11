@@ -1,8 +1,8 @@
-import React from 'react';
 import * as stylex from '@stylexjs/stylex';
 import HomePage from './pages/HomePage';
-import { createBrowserRouter, RouterProvider } from 'react-router-dom';
+import { createBrowserRouter, RouterProvider, Outlet } from 'react-router-dom';
 import "./stylex.css";
+import { PhotoDetailsPage } from './pages/PhotoDetalisPage';
 
 const styles = stylex.create({
   app: {
@@ -12,23 +12,34 @@ const styles = stylex.create({
   },
 });
 
+const AppLayout = () => {
+  return (
+    <div {...stylex.props(styles.app)}>
+      <Outlet />
+    </div>
+  );
+};
+
 const router = createBrowserRouter([
   {
     path: "/",
-    Component: HomePage
+    element: <AppLayout />,
+    children: [
+      {
+        index: true,
+        element: <HomePage />,
+      },
+      {
+        path: "photo/:id",
+        element: <PhotoDetailsPage />,
+      },
+    ],
   },
-  {
-    path: "photo/:id",
-    element: <div> Hello </div>
-  }
-])
+]);
 
 const App: React.FC = () => {
-  return (
-    <div style={styles.app}>
-      <RouterProvider router={router} />
-    </div>
-  )
-}
+  return <RouterProvider router={router} />;
+};
 
-export default App
+export default App;
+

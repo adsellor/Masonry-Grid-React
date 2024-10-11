@@ -115,7 +115,7 @@ export const MasonryGrid: React.FC<MasonryGridProps> = ({ photos, columnWidth, g
         }}
       >
         {isVisible && (
-          <Link to={`/photo/${photo.id}`}>
+          <Link to={`/photo/${photo.id}`} state={photo}>
             <PhotoCard
               src={photo.src.medium}
               alt={photo.alt}
@@ -130,7 +130,6 @@ export const MasonryGrid: React.FC<MasonryGridProps> = ({ photos, columnWidth, g
   }, [positions, actualColumnWidth, intersectingItems, observeItem]);
 
   const renderedItems = useMemo(() => {
-    console.log('Rendering items:', photos.length);
     return photos.map((photo, index) => renderPhoto(photo, index));
   }, [photos, renderPhoto]);
 
