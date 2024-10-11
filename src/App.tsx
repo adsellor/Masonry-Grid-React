@@ -3,6 +3,7 @@ import HomePage from './pages/HomePage';
 import { createBrowserRouter, RouterProvider, Outlet } from 'react-router-dom';
 import "./stylex.css";
 import { PhotoDetailsPage } from './pages/PhotoDetalisPage';
+import { ErrorBoundary } from './components/ErrorBoundary';
 
 const styles = stylex.create({
   app: {
@@ -24,6 +25,7 @@ const router = createBrowserRouter([
   {
     path: "/",
     element: <AppLayout />,
+    errorElement: <ErrorBoundary />,
     children: [
       {
         index: true,
@@ -38,7 +40,7 @@ const router = createBrowserRouter([
 ]);
 
 const App: React.FC = () => {
-  return <RouterProvider router={router} />;
+  return <RouterProvider router={router} />
 };
 
 export default App;
