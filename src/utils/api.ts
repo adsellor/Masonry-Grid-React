@@ -27,7 +27,15 @@ export const fetchPhotos = async (page: number = 1, perPage: number = 20): Promi
 
 export const searchPhotos = async (query: string, page: number, perPage: number): Promise<Photo[]> => {
 	try {
-		const response = await fetch(`${BASE_URL}/search?query=${query}&page=${page}&per_page=${perPage}`);
+		const response = await fetch(`${BASE_URL}/search?query=${query}&page=${page}&per_page=${perPage}`,
+
+			{
+				headers: {
+					Authorization: API_KEY,
+					'Content-Type': 'application/json',
+				}
+			},
+		);
 		if (!response.ok) {
 			throw new Error('Failed to search photos');
 		}

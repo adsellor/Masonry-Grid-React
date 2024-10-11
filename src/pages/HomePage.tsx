@@ -2,6 +2,7 @@ import React from 'react';
 import * as stylex from '@stylexjs/stylex';
 import { MasonryGrid } from '../components/MasonryGrid';
 import { useImageApi } from '../hooks/useImageApi';
+import { SearchBar } from '../components/SearchBar';
 
 const styles = stylex.create({
   container: {
@@ -16,13 +17,12 @@ const styles = stylex.create({
 });
 
 const HomePage: React.FC = () => {
-  const { photos, loading } = useImageApi();
-
-  if (loading) return <div> Loading...</div>
+  const { photos, setSearchQuery } = useImageApi();
 
   return (
     <div {...stylex.props(styles.container)}>
       <h1 {...stylex.props(styles.title)}>Photo Gallery</h1>
+      <SearchBar onSearch={setSearchQuery} />
       <MasonryGrid photos={photos} columnWidth={270} gap={6} />
     </div>
   );

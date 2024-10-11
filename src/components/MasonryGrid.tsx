@@ -102,7 +102,7 @@ export const MasonryGrid: React.FC<MasonryGridProps> = ({ photos, columnWidth, g
 
     return (
       <div
-        key={`${photo.id}-${index}`}
+        key={photo.id}
         data-id={index.toString()}
         ref={(el) => {
           if (el) observeItem(index.toString(), el);
