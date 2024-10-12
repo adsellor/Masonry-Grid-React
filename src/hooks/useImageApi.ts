@@ -1,61 +1,78 @@
-import { useState, useEffect, useCallback, useDeferredValue } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useAtom } from 'jotai';
 import { fetchPhotos, searchPhotos } from '../utils/api';
-import { Photo } from '../types/photo';
-import { debounce } from '../utils/debounce';
 import { useSearchParams } from 'react-router-dom';
+import { pageAtom, photosAtom } from '../store/atoms';
 
-export const useImageApi = (initialQuery: string = '') => {
-	const [photos, setPhotos] = useState<Photo[]>([]);
+const PHOTOS_PER_PAGE = 20;
+const DEBOUNCE_DELAY = 300;
+
+
+export const useImageApi = () => {
+	const [photos, setPhotos] = useAtom(photosAtom);
+	const [page, setPage] = useAtom(pageAtom);
 
 	const [loading, setLoading] = useState(false);
 	const [error, setError] = useState<Error | null>(null);
-	const [page, setPage] = useState(1);
-	const [query, setQuery] = useSearchParams(initialQuery);
+	const [searchParams, setSearchParams] = useSearchParams();
 	const [hasMore, setHasMore] = useState(true);
-	const deferredQuery = useDeferredValue(query.get('search'))
 
-	const loadPhotos = useCallback(async (currentPage: number, currentQuery: string) => {
+	const query = useMemo(() => searchParams.get('search') || '', [searchParams]);
+
+	const loadPhotos = useCallback(async (currentPage: number, currentQuery?: string) => {
 		setLoading(true);
+		setError(null);
 		try {
 			const newPhotos = currentQuery
-				? await searchPhotos(currentQuery, currentPage, 20)
-				: await fetchPhotos(currentPage, 20);
+				? await searchPhotos(currentQuery, currentPage, PHOTOS_PER_PAGE)
+				: await fetchPhotos(currentPage, PHOTOS_PER_PAGE);
 
-			setPhotos(prevPhotos => currentPage === 1 ? newPhotos : [...prevPhotos, ...newPhotos]);
-			setHasMore(newPhotos.length === 20);
+			setPhotos(prevPhotos =>
+				currentPage === 1 ? newPhotos : [...prevPhotos, ...newPhotos]
+			);
+
+			setHasMore(newPhotos.length === PHOTOS_PER_PAGE);
 		} catch (err) {
-			setError(err instanceof Error ? err : new Error('An error occurred'));
+			setError(err instanceof Error ? err : new Error('An error occurred while fetching photos'));
 		} finally {
 			setLoading(false);
 		}
-	}, []);
+	}, [setPhotos]);
 
 	useEffect(() => {
-		setPage(1);
-		loadPhotos(1, deferredQuery ?? '');
-	}, [deferredQuery, loadPhotos]);
+		if (!photos.length) {
+			setPage(1);
+			setPhotos([]);
+			loadPhotos(1, query);
+		}
+	}, [query, loadPhotos, setPage, setPhotos, photos.length]);
 
 	const loadMore = useCallback(() => {
 		if (!loading && hasMore) {
 			const nextPage = page + 1;
 			setPage(nextPage);
-			loadPhotos(nextPage, deferredQuery ?? '');
+			loadPhotos(nextPage, query);
 		}
-	}, [loading, hasMore, page, deferredQuery, loadPhotos]);
+	}, [loading, hasMore, page, query, loadPhotos, setPage]);
 
-	const setSearchQuery = debounce((newQuery: string) => {
-		if (newQuery.trim() === "") {
-			setQuery(prev => {
-				prev.delete('search')
-				return new URLSearchParams()
-			})
-		} else {
-			setQuery({ "search": newQuery });
-		}
-		setPhotos([]);
-		setPage(1);
-		setHasMore(true);
-	}, 300);
+	const debouncedSetSearchQuery = useCallback((newQuery: string) => {
+		const handler = setTimeout(() => {
+			if (newQuery.trim() === "") {
+				setSearchParams(new URLSearchParams());
+			} else {
+				setSearchParams({ search: newQuery });
+			}
+			setPhotos([]);
+			setPage(1);
+			setHasMore(true);
+		}, DEBOUNCE_DELAY);
+
+		return () => clearTimeout(handler);
+	}, [setSearchParams, setPhotos, setPage]);
+
+	const setSearchQuery = useCallback((newQuery: string) => {
+		debouncedSetSearchQuery(newQuery);
+	}, [debouncedSetSearchQuery]);
 
 	return {
 		photos,
@@ -64,6 +81,6 @@ export const useImageApi = (initialQuery: string = '') => {
 		loadMore,
 		setSearchQuery,
 		hasMore,
-		searchQuery: query.get('search')
+		searchQuery: query
 	};
 };

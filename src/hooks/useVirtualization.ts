@@ -7,7 +7,7 @@ interface VirtualizationOptions {
 }
 
 export const useVirtualization = (options: VirtualizationOptions = {}) => {
-	const [intersectingItems, setIntersectingItems] = useState<Set<string>>(new Set());
+	const [visibleItems, setVisibleItems] = useState<Set<string>>(new Set());
 	const observerRef = useRef<IntersectionObserver | null>(null);
 	const itemRefs = useRef<{ [key: string]: Element }>({});
 
@@ -17,29 +17,26 @@ export const useVirtualization = (options: VirtualizationOptions = {}) => {
 		}
 
 		observerRef.current = new IntersectionObserver((entries) => {
+			const newVisibleItems = new Set(visibleItems);
 			entries.forEach((entry) => {
 				const id = entry.target.getAttribute('data-id');
 				if (id) {
-					setIntersectingItems((prev) => {
-						const newSet = new Set(prev);
-						if (entry.isIntersecting) {
-							newSet.add(id);
-						} else {
-							newSet.delete(id);
-						}
-						return newSet;
-					});
+					if (entry.isIntersecting) {
+						newVisibleItems.add(id);
+					} else {
+						newVisibleItems.delete(id);
+					}
 				}
 			});
+			setVisibleItems(newVisibleItems);
 		}, options);
 
-		// Re-observe all existing items
 		Object.values(itemRefs.current).forEach((el) => {
 			if (observerRef.current) {
 				observerRef.current.observe(el);
 			}
 		});
-	}, [options]);
+	}, [options, visibleItems]);
 
 	useEffect(() => {
 		createObserver();
@@ -66,5 +63,5 @@ export const useVirtualization = (options: VirtualizationOptions = {}) => {
 		}
 	}, []);
 
-	return { intersectingItems, observeItem, unobserveItem };
+	return { visibleItems, observeItem, unobserveItem };
 };

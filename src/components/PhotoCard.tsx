@@ -28,9 +28,9 @@ const styles = stylex.create({
 interface PhotoCardProps {
   src: string;
   alt: string;
-  width: number;
-  height: number;
-  onLoad: () => void;
+  width?: number;
+  height?: number;
+  onLoad?: () => void;
   priority?: boolean;
 }
 
@@ -43,7 +43,7 @@ export const PhotoCard: React.FC<PhotoCardProps> = ({ src, alt, width, height, o
     img.src = src;
     img.onload = () => {
       setIsLoaded(true);
-      onLoad();
+      onLoad?.();
     };
 
     if (priority) {
@@ -58,8 +58,8 @@ export const PhotoCard: React.FC<PhotoCardProps> = ({ src, alt, width, height, o
         ref={imgRef}
         src={src}
         alt={alt}
-        width={width}
-        height={height}
+        width={width ?? '100%'}
+        height={height ?? '100%'}
         {...stylex.props(styles.image)}
         style={{ opacity: isLoaded ? 1 : 0 }}
         loading={priority ? 'eager' : 'lazy'}

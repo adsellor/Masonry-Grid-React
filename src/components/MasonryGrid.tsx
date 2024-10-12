@@ -1,9 +1,11 @@
-import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
+import React, { useEffect, useRef, useCallback, useMemo } from 'react';
 import stylex from '@stylexjs/stylex';
 import { Link } from 'react-router-dom';
 import { Photo } from '../types/photo';
 import { useResizeHandler } from '../hooks/useResizeHandler';
 import { useVirtualization } from '../hooks/useVirtualization';
+import { useMasonryLayout } from '../hooks/useMasonryLayout';
+import { useEndReached } from '../hooks/useEndReached';
 import { PhotoCard } from './PhotoCard';
 
 const styles = stylex.create({
@@ -24,85 +26,65 @@ interface MasonryGridProps {
   photos: Photo[];
   columnWidth: number;
   gap: number;
+  onEndReached?: () => void;
+  endReachedThreshold?: number;
 }
 
-interface Position {
-  top: number;
-  left: number;
-  height: number;
-}
-
-interface MasonryGridProps {
-  photos: Photo[];
-  columnWidth: number;
-  gap: number;
-}
-
-interface Position {
-  top: number;
-  left: number;
-  height: number;
-}
-
-export const MasonryGrid: React.FC<MasonryGridProps> = ({ photos, columnWidth, gap }) => {
+export const MasonryGrid: React.FC<MasonryGridProps> = ({
+  photos,
+  columnWidth,
+  gap,
+  onEndReached,
+  endReachedThreshold = 200
+}) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const { width: containerWidth } = useResizeHandler(containerRef);
-  const [positions, setPositions] = useState<Position[]>([]);
 
-  const columnCount = Math.floor(containerWidth / (columnWidth + gap));
-  const actualColumnWidth = (containerWidth - (columnCount - 1) * gap) / columnCount;
+  const { positions, calculatePositions, gridHeight, actualColumnWidth } = useMasonryLayout(
+    photos,
+    columnWidth,
+    gap,
+    containerWidth
+  );
 
-  const { intersectingItems, observeItem, unobserveItem } = useVirtualization({
+  useEndReached(onEndReached, endReachedThreshold);
+
+  const { visibleItems, observeItem, unobserveItem } = useVirtualization({
     rootMargin: '0px 0px 100px 0px',
     threshold: 0,
   });
-
-
-  const calculatePositions = useCallback(() => {
-    if (columnCount === 0) return;
-
-    const newPositions: Position[] = [];
-    const columnHeights = new Array(columnCount).fill(0);
-
-    photos.forEach((photo, index) => {
-      const shortestColumnIndex = columnHeights.indexOf(Math.min(...columnHeights));
-      const aspectRatio = photo.height / photo.width;
-      const height = actualColumnWidth * aspectRatio;
-
-      newPositions[index] = {
-        left: shortestColumnIndex * (actualColumnWidth + gap),
-        top: columnHeights[shortestColumnIndex],
-        height,
-      };
-
-      columnHeights[shortestColumnIndex] += height + gap;
-    });
-
-    setPositions(newPositions);
-  }, [photos, columnCount, actualColumnWidth, gap]);
 
   useEffect(() => {
     calculatePositions();
   }, [calculatePositions]);
 
-  const gridHeight = useMemo(() => {
-    return positions.length > 0
-      ? Math.max(...positions.map(pos => pos.top + pos.height))
-      : 0;
-  }, [positions]);
-
-
-
-
   const renderPhoto = useCallback((photo: Photo, index: number) => {
     const position = positions[index];
     if (!position) return null;
 
-    const isVisible = intersectingItems.has(index.toString());
+    const isVisible = visibleItems.has(index.toString());
+
+    if (!isVisible) {
+      return (
+        <div
+          key={`${photo.id}:${index}`}
+          data-id={index.toString()}
+          ref={(el) => {
+            if (el) observeItem(index.toString(), el);
+          }}
+          {...stylex.props(styles.item)}
+          style={{
+            transform: `translate3d(${position.left}px, ${position.top}px, 0)`,
+            width: `${actualColumnWidth}px`,
+            height: `${position.height}px`,
+          }}
+        />
+      );
+    }
 
     return (
       <div
-        key={photo.id}
+        key={`${photo.id}:${index}`}
         data-id={index.toString()}
         ref={(el) => {
           if (el) observeItem(index.toString(), el);
@@ -114,20 +96,18 @@ export const MasonryGrid: React.FC<MasonryGridProps> = ({ photos, columnWidth, g
           height: `${position.height}px`,
         }}
       >
-        {isVisible && (
-          <Link to={`/photo/${photo.id}`} state={photo}>
-            <PhotoCard
-              src={photo.src.medium}
-              alt={photo.alt}
-              width={actualColumnWidth}
-              height={position.height}
-              onLoad={() => null}
-            />
-          </Link>
-        )}
+        <Link to={`/photo/${photo.id}`} state={photo}>
+          <PhotoCard
+            src={photo.src.medium}
+            alt={photo.alt}
+            width={actualColumnWidth}
+            height={position.height}
+            onLoad={() => null}
+          />
+        </Link>
       </div>
     );
-  }, [positions, actualColumnWidth, intersectingItems, observeItem]);
+  }, [positions, actualColumnWidth, visibleItems, observeItem]);
 
   const renderedItems = useMemo(() => {
     return photos.map((photo, index) => renderPhoto(photo, index));
@@ -148,4 +128,4 @@ export const MasonryGrid: React.FC<MasonryGridProps> = ({ photos, columnWidth, g
       {renderedItems}
     </div>
   );
-}
+};

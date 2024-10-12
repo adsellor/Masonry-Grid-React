@@ -4,6 +4,7 @@ import { useLocation, useNavigate, useParams } from 'react-router-dom';
 
 import { Photo } from '../types/photo';
 import { getPhotoById } from '../utils/api';
+import { PhotoCard } from '../components/PhotoCard';
 
 const styles = stylex.create({
   container: {
@@ -95,7 +96,7 @@ export const PhotoDetailsPage = () => {
         <h1 {...stylex.props(styles.title)}>{photoInfo.alt}</h1>
       </header>
       <div {...stylex.props(styles.imageContainer)}>
-        <img src={photoInfo.src.large} alt={photoInfo.alt} {...stylex.props(styles.image)} />
+        <PhotoCard width={photoInfo.width / 6} height={photoInfo.height / 10} src={photoInfo.src.original} alt={photoInfo.alt} />
         <div>
         </div>
       </div>

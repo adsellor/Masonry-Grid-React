@@ -1,4 +1,3 @@
-import { Component, ErrorInfo } from 'react';
 import stylex from '@stylexjs/stylex';
 import { useRouteError } from 'react-router-dom';
 
