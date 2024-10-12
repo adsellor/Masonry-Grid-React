@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useDeferredValue } from 'react';
 import { fetchPhotos, searchPhotos } from '../utils/api';
 import { Photo } from '../types/photo';
 import { debounce } from '../utils/debounce';
+import { useSearchParams } from 'react-router-dom';
 
 export const useImageApi = (initialQuery: string = '') => {
 	const [photos, setPhotos] = useState<Photo[]>([]);
@@ -9,9 +10,9 @@ export const useImageApi = (initialQuery: string = '') => {
 	const [loading, setLoading] = useState(false);
 	const [error, setError] = useState<Error | null>(null);
 	const [page, setPage] = useState(1);
-	const [query, setQuery] = useState(initialQuery);
+	const [query, setQuery] = useSearchParams(initialQuery);
 	const [hasMore, setHasMore] = useState(true);
-	const deferredQuery = useDeferredValue(query)
+	const deferredQuery = useDeferredValue(query.get('search'))
 
 	const loadPhotos = useCallback(async (currentPage: number, currentQuery: string) => {
 		setLoading(true);
@@ -31,23 +32,38 @@ export const useImageApi = (initialQuery: string = '') => {
 
 	useEffect(() => {
 		setPage(1);
-		loadPhotos(1, deferredQuery);
+		loadPhotos(1, deferredQuery ?? '');
 	}, [deferredQuery, loadPhotos]);
 
 	const loadMore = useCallback(() => {
 		if (!loading && hasMore) {
 			const nextPage = page + 1;
 			setPage(nextPage);
-			loadPhotos(nextPage, deferredQuery);
+			loadPhotos(nextPage, deferredQuery ?? '');
 		}
 	}, [loading, hasMore, page, deferredQuery, loadPhotos]);
 
 	const setSearchQuery = debounce((newQuery: string) => {
-		setQuery(newQuery);
+		if (newQuery.trim() === "") {
+			setQuery(prev => {
+				prev.delete('search')
+				return new URLSearchParams()
+			})
+		} else {
+			setQuery({ "search": newQuery });
+		}
 		setPhotos([]);
 		setPage(1);
 		setHasMore(true);
 	}, 300);
 
-	return { photos, loading, error, loadMore, setSearchQuery, hasMore };
+	return {
+		photos,
+		loading,
+		error,
+		loadMore,
+		setSearchQuery,
+		hasMore,
+		searchQuery: query.get('search')
+	};
 };

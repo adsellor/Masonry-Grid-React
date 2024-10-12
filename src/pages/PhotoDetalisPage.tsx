@@ -13,15 +13,22 @@ const styles = stylex.create({
   },
   header: {
     display: 'flex',
-    justifyContent: 'space-between',
     alignItems: 'center',
+    justifyContent: 'center',
     marginBottom: '2rem',
+  },
+  title: {
+    maxWidth: '50rem',
+    textAlign: 'center',
+    marginRight: 'auto',
   },
   imageContainer: {
     position: 'relative',
     marginBottom: '2rem',
     display: 'flex',
     flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center'
   },
   image: {
     borderRadius: '0.5rem',
@@ -40,6 +47,13 @@ const styles = stylex.create({
     display: 'flex',
     justifyContent: 'space-between',
   },
+  button: {
+    marginRight: 'auto',
+    borderRadius: 15,
+    backgroundColor: 'lightgray',
+    border: '1px solid',
+    padding: '0.25rem'
+  }
 });
 
 
@@ -76,28 +90,13 @@ export const PhotoDetailsPage = () => {
 
   return (
     <div {...stylex.props(styles.container)}>
-      <header onClick={goBack} {...stylex.props(styles.header)}>
-        Go to Gallery
-        <h1>{photoInfo.alt}</h1>
+      <header {...stylex.props(styles.header)}>
+        <a onClick={goBack} {...stylex.props(styles.button)}> Go to Gallery </a>
+        <h1 {...stylex.props(styles.title)}>{photoInfo.alt}</h1>
       </header>
       <div {...stylex.props(styles.imageContainer)}>
         <img src={photoInfo.src.large} alt={photoInfo.alt} {...stylex.props(styles.image)} />
         <div>
-          <div {...stylex.props(styles.metadata)}>
-            <h2>Image Details</h2>
-            <div {...stylex.props(styles.metadataItem)}>
-              <span>Photographer:</span>
-              <span>{photoInfo.photographer}</span>
-            </div>
-            <div {...stylex.props(styles.metadataItem)}>
-              <span>Dimensions:</span>
-              <span>{photoInfo.width} x {photoInfo.height}</span>
-            </div>
-            <div {...stylex.props(styles.metadataItem)}>
-              <span>Color:</span>
-              <span style={{ backgroundColor: photoInfo.avg_color, width: '20px', height: '20px', display: 'inline-block', borderRadius: '50%' }}></span>
-            </div>
-          </div>
         </div>
       </div>
       <div {...stylex.props(styles.infoContainer)}>
@@ -105,6 +104,21 @@ export const PhotoDetailsPage = () => {
           <h2>About this photo</h2>
           <p>{photoInfo.alt}</p>
         </div>}
+        <div {...stylex.props(styles.metadata)}>
+          <h2>Image Details</h2>
+          <div {...stylex.props(styles.metadataItem)}>
+            <span>Photographer:</span>
+            <span>{photoInfo.photographer}</span>
+          </div>
+          <div {...stylex.props(styles.metadataItem)}>
+            <span>Dimensions:</span>
+            <span>{photoInfo.width} x {photoInfo.height}</span>
+          </div>
+          <div {...stylex.props(styles.metadataItem)}>
+            <span>Color:</span>
+            <span style={{ backgroundColor: photoInfo.avg_color, width: '20px', height: '20px', display: 'inline-block', borderRadius: '50%' }}></span>
+          </div>
+        </div>
       </div>
     </div>
   );

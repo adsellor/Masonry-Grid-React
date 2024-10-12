@@ -31,10 +31,11 @@ const styles = stylex.create({
 
 interface SearchBarProps {
   onSearch: (query: string) => void;
+  initialValue: string;
 }
 
-export const SearchBar: React.FC<SearchBarProps> = ({ onSearch }) => {
-  const [query, setQuery] = useState('');
+export const SearchBar: React.FC<SearchBarProps> = ({ onSearch, initialValue }) => {
+  const [query, setQuery] = useState(initialValue);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newQuery = e.target.value;

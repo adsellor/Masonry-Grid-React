@@ -17,12 +17,12 @@ const styles = stylex.create({
 });
 
 const HomePage: React.FC = () => {
-  const { photos, setSearchQuery } = useImageApi();
+  const { photos, setSearchQuery, searchQuery } = useImageApi();
 
   return (
     <div {...stylex.props(styles.container)}>
       <h1 {...stylex.props(styles.title)}>Photo Gallery</h1>
-      <SearchBar onSearch={setSearchQuery} />
+      <SearchBar onSearch={setSearchQuery} initialValue={searchQuery ?? ""} />
       <MasonryGrid photos={photos} columnWidth={270} gap={6} />
     </div>
   );

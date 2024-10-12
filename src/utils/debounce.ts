@@ -1,4 +1,4 @@
-type AnyFunction = (...args: unknown[]) => unknown;
+type AnyFunction = (...args: never[]) => unknown;
 
 export function debounce<T extends AnyFunction>(
 	func: T,
