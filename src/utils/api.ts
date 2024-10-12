@@ -1,8 +1,7 @@
 import { Photo } from "../types/photo";
 
-const API_KEY = 'jxoPSHJP4xo8cPI7fwd5uu5ZOajruXi6w4YGFtl0lz1QsBXUpWyjWFvz';
-const BASE_URL = 'https://api.pexels.com/v1';
-
+const API_KEY = import.meta.env.VITE_API_KEY;
+const BASE_URL = import.meta.env.VITE_BASE_URL;
 
 export const fetchPhotos = async (page: number = 1, perPage: number = 20): Promise<Photo[]> => {
 	try {
