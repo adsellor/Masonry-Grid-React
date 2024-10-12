@@ -20,7 +20,7 @@ const styles = stylex.create({
 const HomePage: React.FC = () => {
   const { photos, setSearchQuery, searchQuery, loadMore, loading } = useImageApi();
 
-  if (loading && !photos.length) {
+  if (loading && !photos.length && !searchQuery) {
     return <Loading size='large' />
   }
 

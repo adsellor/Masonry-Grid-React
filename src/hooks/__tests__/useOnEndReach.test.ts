@@ -1,5 +1,5 @@
 import { renderHook } from '@testing-library/react-hooks';
-import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
+import { describe, it, expect, beforeEach, vi, afterEach, Mock } from 'vitest';
 import { useEndReached } from '../useEndReached';
 
 describe('useEndReached', () => {
@@ -52,7 +52,7 @@ describe('useEndReached', () => {
 			}
 		});
 
-		const scrollHandler = (window.addEventListener as jest.Mock).mock.calls[0][1];
+		const scrollHandler = (window.addEventListener as Mock).mock.calls[0][1];
 		scrollHandler();
 
 		expect(onEndReached).toHaveBeenCalledTimes(1);
@@ -94,7 +94,7 @@ describe('useEndReached', () => {
 			}
 		});
 
-		const scrollHandler = (window.addEventListener as jest.Mock).mock.calls[0][1];
+		const scrollHandler = (window.addEventListener as Mock).mock.calls[0][1];
 		scrollHandler();
 
 		expect(() => scrollHandler()).not.toThrow();
@@ -113,7 +113,7 @@ describe('useEndReached', () => {
 			}
 		});
 
-		const scrollHandler = (window.addEventListener as jest.Mock).mock.calls[0][1];
+		const scrollHandler = (window.addEventListener as Mock).mock.calls[0][1];
 		scrollHandler();
 
 		expect(onEndReached).not.toHaveBeenCalled();

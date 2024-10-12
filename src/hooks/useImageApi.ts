@@ -3,9 +3,10 @@ import { useAtom } from 'jotai';
 import { fetchPhotos, searchPhotos } from '../utils/api';
 import { useSearchParams } from 'react-router-dom';
 import { pageAtom, photosAtom } from '../store/atoms';
+import { debounce } from '../utils/debounce';
 
 const PHOTOS_PER_PAGE = 20;
-const DEBOUNCE_DELAY = 300;
+const DEBOUNCE_DELAY = 500;
 
 
 export const useImageApi = () => {
@@ -55,24 +56,16 @@ export const useImageApi = () => {
 		}
 	}, [loading, hasMore, page, query, loadPhotos, setPage]);
 
-	const debouncedSetSearchQuery = useCallback((newQuery: string) => {
-		const handler = setTimeout(() => {
-			if (newQuery.trim() === "") {
-				setSearchParams(new URLSearchParams());
-			} else {
-				setSearchParams({ search: newQuery });
-			}
-			setPhotos([]);
-			setPage(1);
-			setHasMore(true);
-		}, DEBOUNCE_DELAY);
-
-		return () => clearTimeout(handler);
-	}, [setSearchParams, setPhotos, setPage]);
-
-	const setSearchQuery = useCallback((newQuery: string) => {
-		debouncedSetSearchQuery(newQuery);
-	}, [debouncedSetSearchQuery]);
+	const setSearchQuery = debounce((newQuery: string) => {
+		if (newQuery.trim() === "") {
+			setSearchParams(new URLSearchParams());
+		} else {
+			setSearchParams({ search: newQuery });
+		}
+		setPhotos([]);
+		setPage(1);
+		setHasMore(true);
+	}, DEBOUNCE_DELAY);
 
 	return {
 		photos,
