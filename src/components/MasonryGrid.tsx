@@ -63,6 +63,7 @@ export const MasonryGrid: React.FC<MasonryGridProps> = ({
     if (!position) return null;
 
     const isVisible = visibleItems.has(index.toString());
+    const aspectRatio = photo.width / photo.height;
 
     if (!isVisible) {
       return (
@@ -100,8 +101,7 @@ export const MasonryGrid: React.FC<MasonryGridProps> = ({
           <PhotoCard
             src={photo.src.medium}
             alt={photo.alt}
-            width={actualColumnWidth}
-            height={position.height}
+            aspectRatio={aspectRatio}
             onLoad={() => null}
           />
         </Link>

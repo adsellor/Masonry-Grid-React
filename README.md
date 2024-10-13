@@ -1,50 +1,94 @@
-# React + TypeScript + Vite
+# Simple Masonry Layout 
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+[View Live Demo](https://masonry-grid-react-jogyuegb5-adsellors-projects.vercel.app/)
 
-Currently, two official plugins are available:
+## Project Overview
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+Masonry layotu created with Vite+React+TS. 
 
-## Expanding the ESLint configuration
+## Installation and Setup
 
-If you are developing a production application, we recommend updating the configuration to enable type aware lint rules:
+1. Clone the repository:
+   ```
+   git clone https://github.com/adsellor/Masonry-Grid-React
+   cd masonry-grid-react
+   ```
 
-- Configure the top-level `parserOptions` property like this:
+2. Install dependencies:
+   ```
+   bun install # or any other package manager
+   ```
 
-```js
-export default tseslint.config({
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-})
+3. Run the development server:
+   ```
+   bun dev # npm run dev, yarn dev, pnpm dev
+   ```
+
+4. Create `.env.local` file and add `VITE_BASE_URL` and `VITE_API_KEY` variables.
+
+5. Open `http://localhost:5173` in your browser to view the application.
+
+## Features
+
+1. **Virtualized Masonry Grid Layout**
+   - Responsive design that adapts to different screen sizes
+   - Grid virtualization
+
+2. **Photo Details View**
+   - Displays selected photo in larger size
+   - Shows additional information (title, description, photographer's name)
+   - Includes a back button to return to the grid
+
+3. **Performance Optimizations**
+   - Virtualization for efficient rendering of large image sets
+   - Optimized asset loading
+   - Efficient state management
+
+4. **Image Search**
+   - Dynamic image search based on keywords
+   - Debounced network request for search
+
+## Implementation Details
+
+### Virtualized Masonry Grid
+
+The masonry grid is implemented using a custom virtualization technique to ensure smooth performance with large datasets. Key aspects include:
+
+- Calculation of visible items based on scroll position using IntersectionObserver
+- Dynamic rendering of only visible images
+- Efficient update of item positions on resize events
+
+### Photo Details View
+
+The detailed view for photos is implemented as a separate route, allowing for deep linking and proper browser history management. It includes:
+
+- High-resolution image display
+- Metadata presentation (title, description, photographer, avg color)
+
+### Performance Considerations
+
+To ensure optimal performance, the following techniques are employed:
+
+- Image lazy loading and progressive loading for faster initial render
+- Memoization of expensive calculations using useMemo and useCallback
+- Debouncing of resize and scroll event handlers
+- Code splitting and lazy loading of components
+
+### Styling with StyleX
+
+StyleX is used for high-performance styling:
+
+- Atomic CSS generation for optimal performance
+- Type-safe styling with TypeScript integration
+- Dynamic styles based on props and state
+
+## Testing
+
+There are test for business logic covered in hooks
+To run the tests:
+
+```
+bun run test
 ```
 
-- Replace `tseslint.configs.recommended` to `tseslint.configs.recommendedTypeChecked` or `tseslint.configs.strictTypeChecked`
-- Optionally add `...tseslint.configs.stylisticTypeChecked`
-- Install [eslint-plugin-react](https://github.com/jsx-eslint/eslint-plugin-react) and update the config:
 
-```js
-// eslint.config.js
-import react from 'eslint-plugin-react'
-
-export default tseslint.config({
-  // Set the react version
-  settings: { react: { version: '18.3' } },
-  plugins: {
-    // Add the react plugin
-    react,
-  },
-  rules: {
-    // other rules...
-    // Enable its recommended rules
-    ...react.configs.recommended.rules,
-    ...react.configs['jsx-runtime'].rules,
-  },
-})
-```

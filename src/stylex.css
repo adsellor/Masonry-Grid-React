@@ -1,1 +1,5 @@
 @stylex stylesheet;
+
+body {
+	margin: unset;
+}
