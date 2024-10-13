@@ -3,7 +3,7 @@ import * as stylex from '@stylexjs/stylex';
 import { MasonryGrid } from '../components/MasonryGrid';
 import { useImageApi } from '../hooks/useImageApi';
 import { SearchBar } from '../components/SearchBar';
-import Loading from '../components/Loading';
+import { Loading } from '../components/Loading';
 
 const styles = stylex.create({
   container: {
@@ -28,7 +28,7 @@ const HomePage: React.FC = () => {
     <div {...stylex.props(styles.container)}>
       <h1 {...stylex.props(styles.title)}>Photo Gallery</h1>
       <SearchBar onSearch={setSearchQuery} initialValue={searchQuery ?? ""} />
-      <MasonryGrid onEndReached={loadMore} photos={photos} columnWidth={200} gap={6} />
+      <MasonryGrid onEndReached={loadMore} photos={photos} gap={6} />
     </div>
   );
 };

@@ -1,12 +1,11 @@
-import React, { useEffect, useRef, useCallback, useMemo } from 'react';
+import React, { useRef, useMemo } from 'react';
 import stylex from '@stylexjs/stylex';
 import { Link } from 'react-router-dom';
 import { Photo } from '../types/photo';
-import { useResizeHandler } from '../hooks/useResizeHandler';
-import { useVirtualization } from '../hooks/useVirtualization';
-import { useMasonryLayout } from '../hooks/useMasonryLayout';
 import { useEndReached } from '../hooks/useEndReached';
 import { PhotoCard } from './PhotoCard';
+import { useVirtualization, VirtualizedItem } from '../hooks/useVirtualization';
+
 
 const styles = stylex.create({
   grid: {
@@ -17,115 +16,86 @@ const styles = stylex.create({
     position: 'absolute',
     top: 0,
     left: 0,
-    width: '100%',
     transition: 'transform 0.2s',
+  },
+  columnCount: {
+    '@media (max-width: 640px)': {
+      '--columns': '2',
+    },
+    '@media (min-width: 641px) and (max-width: 1024px)': {
+      '--columns': '4',
+    },
+    '@media (min-width: 1025px)': {
+      '--columns': '5',
+    },
   },
 });
 
 interface MasonryGridProps {
   photos: Photo[];
-  columnWidth: number;
   gap: number;
   onEndReached?: () => void;
   endReachedThreshold?: number;
 }
 
-export const MasonryGrid: React.FC<MasonryGridProps> = ({
-  photos,
-  columnWidth,
-  gap,
-  onEndReached,
-  endReachedThreshold = 200
-}) => {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const { width: containerWidth } = useResizeHandler(containerRef);
+export const MasonryGrid: React.FC<MasonryGridProps> = React.memo(
+  ({ photos, gap, onEndReached, endReachedThreshold = 200 }) => {
+    const containerRef = useRef<HTMLDivElement>(null);
 
-  const { positions, calculatePositions, gridHeight, actualColumnWidth } = useMasonryLayout(
-    photos,
-    columnWidth,
-    gap,
-    containerWidth
-  );
+    useEndReached(onEndReached, endReachedThreshold);
 
-  useEndReached(onEndReached, endReachedThreshold);
+    const { visibleItems, totalHeight } = useVirtualization(
+      photos,
+      containerRef,
+      gap
+    );
 
-  const { visibleItems, observeItem, unobserveItem } = useVirtualization({
-    rootMargin: '0px 0px 100px 0px',
-    threshold: 0,
-  });
-
-  useEffect(() => {
-    calculatePositions();
-  }, [calculatePositions]);
-
-  const renderPhoto = useCallback((photo: Photo, index: number) => {
-    const position = positions[index];
-    if (!position) return null;
-
-    const isVisible = visibleItems.has(index.toString());
-    const aspectRatio = photo.width / photo.height;
-
-    if (!isVisible) {
-      return (
-        <div
-          key={`${photo.id}:${index}`}
-          data-id={index.toString()}
-          ref={(el) => {
-            if (el) observeItem(index.toString(), el);
-          }}
-          {...stylex.props(styles.item)}
-          style={{
-            transform: `translate3d(${position.left}px, ${position.top}px, 0)`,
-            width: `${actualColumnWidth}px`,
-            height: `${position.height}px`,
-          }}
-        />
-      );
-    }
+    const renderedItems = useMemo(
+      () =>
+        visibleItems.map((item) => (
+          <MemoizedMasonryItem key={item.id} item={item} />
+        )),
+      [visibleItems]
+    );
 
     return (
       <div
-        key={`${photo.id}:${index}`}
-        data-id={index.toString()}
-        ref={(el) => {
-          if (el) observeItem(index.toString(), el);
-        }}
-        {...stylex.props(styles.item)}
-        style={{
-          transform: `translate3d(${position.left}px, ${position.top}px, 0)`,
-          width: `${actualColumnWidth}px`,
-          height: `${position.height}px`,
-        }}
+        ref={containerRef}
+        {...stylex.props(styles.grid, styles.columnCount)}
+        style={{ height: `${totalHeight}px` }}
       >
-        <Link to={`/photo/${photo.id}`} state={photo}>
-          <PhotoCard
-            src={photo.src.medium}
-            alt={photo.alt}
-            aspectRatio={aspectRatio}
-            onLoad={() => null}
-          />
-        </Link>
+        {renderedItems}
       </div>
     );
-  }, [positions, actualColumnWidth, visibleItems, observeItem]);
+  }
+);
 
-  const renderedItems = useMemo(() => {
-    return photos.map((photo, index) => renderPhoto(photo, index));
-  }, [photos, renderPhoto]);
+interface MasonryItemProps<T> {
+  item: VirtualizedItem<T>;
+}
 
-  useEffect(() => {
-    return () => {
-      photos.forEach((_, index) => unobserveItem(index.toString()));
-    };
-  }, [photos, unobserveItem]);
-
+const MasonryItem = <T extends Photo>({
+  item,
+}: MasonryItemProps<T>) => {
+  const { data, left, top, width, height } = item;
   return (
     <div
-      ref={containerRef}
-      {...stylex.props(styles.grid)}
-      style={{ height: `${gridHeight}px` }}
+      {...stylex.props(styles.item)}
+      style={{
+        transform: `translate3d(${left}px, ${top}px, 0)`,
+        width: `${width}px`,
+        height: `${height}px`,
+      }}
     >
-      {renderedItems}
+      <Link to={`/photo/${data.id}`} state={data}>
+        <PhotoCard
+          src={data.src.large}
+          alt={data.alt}
+          aspectRatio={data.width / data.height}
+        />
+      </Link>
     </div>
   );
-};
+}
+
+const MemoizedMasonryItem = React.memo(MasonryItem);

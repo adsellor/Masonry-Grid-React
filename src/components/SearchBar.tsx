@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import stylex from '@stylexjs/stylex';
+import { X } from 'lucide-react';
 
 const styles = stylex.create({
   container: {
@@ -9,6 +10,7 @@ const styles = stylex.create({
     maxWidth: '400px',
     margin: '0 auto 20px',
     zIndex: 20,
+    position: 'relative',
   },
   input: {
     width: '100%',
@@ -26,6 +28,15 @@ const styles = stylex.create({
     position: 'absolute',
     right: '15px',
     color: '#666',
+    cursor: 'pointer',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: '24px',
+    height: '24px',
+    background: 'transparent',
+    border: 'none',
+    padding: 0,
   },
 });
 
@@ -43,6 +54,11 @@ export const SearchBar: React.FC<SearchBarProps> = ({ onSearch, initialValue }) 
     onSearch(newQuery);
   };
 
+  const handleClear = () => {
+    setQuery('');
+    onSearch('');
+  };
+
   return (
     <div {...stylex.props(styles.container)}>
       <input
@@ -53,7 +69,15 @@ export const SearchBar: React.FC<SearchBarProps> = ({ onSearch, initialValue }) 
         {...stylex.props(styles.input)}
         aria-label="Search photos"
       />
+      {query && (
+        <button
+          onClick={handleClear}
+          {...stylex.props(styles.icon)}
+          aria-label="Clear search"
+        >
+          <X size={18} />
+        </button>
+      )}
     </div>
   );
 };
-

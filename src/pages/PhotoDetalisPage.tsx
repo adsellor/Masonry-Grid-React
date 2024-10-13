@@ -4,15 +4,15 @@ import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
 
 import { Photo } from '../types/photo';
-import { getPhotoById } from '../utils/api';
+import { getPhotoById } from '../api';
 import { PhotoCard } from '../components/PhotoCard';
 import { PhotoMetadata } from '../components/PhotoMetadata';
 
 const styles = stylex.create({
   wrapper: (backgroundColor: string) => ({
     backgroundColor,
-    height: '100vh',
-    widtH: '100vw'
+    flex: 1,
+    minHeight: '100vh'
   }),
   container: {
     maxWidth: '1200px',
@@ -94,8 +94,10 @@ export const PhotoDetailsPage = () => {
       <div {...stylex.props(styles.container)}>
         <header {...stylex.props(styles.header)}>
           <button onClick={goBack} {...stylex.props(styles.button)}><ArrowLeft />Go to Gallery</button>
-          <h1 {...stylex.props(styles.title)}>{photoInfo.alt}</h1>
         </header>
+        <div {...stylex.props(styles.header)}>
+          <h1 {...stylex.props(styles.title)}>{photoInfo.alt}</h1>
+        </div>
         <div {...stylex.props(styles.imageContainer)}>
           <PhotoCard
             aspectRatio={1.5}

@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useAtom } from 'jotai';
-import { fetchPhotos, searchPhotos } from '../utils/api';
+import { fetchPhotos, searchPhotos } from '../api';
 import { useSearchParams } from 'react-router-dom';
 import { pageAtom, photosAtom } from '../store/atoms';
 import { debounce } from '../utils/debounce';

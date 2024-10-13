@@ -1,10 +1,10 @@
 import { renderHook, act } from '@testing-library/react-hooks';
 import { describe, it, expect, vi, beforeEach, Mock } from 'vitest';
 import { useImageApi } from '../useImageApi';
-import { fetchPhotos, searchPhotos } from '../../utils/api';
+import { fetchPhotos, searchPhotos } from '../../api';
 import { useSearchParams } from 'react-router-dom';
 
-vi.mock('../../utils/api');
+vi.mock('../../api');
 vi.mock('react-router-dom');
 
 describe('useImageApi', () => {
