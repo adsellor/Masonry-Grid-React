@@ -1,6 +1,6 @@
 # Simple Masonry Layout 
 
-[View Live Demo](https://masonry-grid-react-jogyuegb5-adsellors-projects.vercel.app/)
+[View Live Demo](https://masonry-grid-react.vercel.app/)
 
 ## Project Overview
 
