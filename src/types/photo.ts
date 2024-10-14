@@ -19,5 +19,6 @@ export interface Photo {
 	};
 	liked: boolean;
 	alt: string;
+	uid: string;
 }
 

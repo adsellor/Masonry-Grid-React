@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useAtom } from 'jotai';
+import { nanoid } from 'nanoid';
 import { fetchPhotos, searchPhotos } from '../api';
 import { useSearchParams } from 'react-router-dom';
 import { pageAtom, photosAtom } from '../store/atoms';
@@ -28,8 +29,12 @@ export const useImageApi = () => {
 				? await searchPhotos(currentQuery, currentPage, PHOTOS_PER_PAGE)
 				: await fetchPhotos(currentPage, PHOTOS_PER_PAGE);
 
+			const mappedPhotos = newPhotos.map(photo => ({
+				...photo,
+				uid: nanoid(),
+			}))
 			setPhotos(prevPhotos =>
-				currentPage === 1 ? newPhotos : [...prevPhotos, ...newPhotos]
+				currentPage === 1 ? mappedPhotos : [...prevPhotos, ...mappedPhotos]
 			);
 
 			setHasMore(newPhotos.length === PHOTOS_PER_PAGE);

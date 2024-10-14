@@ -1,4 +1,4 @@
-import { useState, useEffect, RefObject, useCallback, useRef } from 'react';
+import { useState, RefObject, useCallback, useRef, useLayoutEffect } from 'react';
 
 export interface VirtualizedItem<T> {
 	id: number | string;
@@ -14,7 +14,9 @@ interface UseVirtualizedResult<T> {
 	totalHeight: number;
 }
 
-export const useVirtualization = <T extends { id: number | string; width: number; height: number }>(
+export const useVirtualization = <
+	T extends { id: number | string; width: number; height: number }
+>(
 	items: T[],
 	containerRef: RefObject<HTMLDivElement>,
 	gap: number
@@ -33,12 +35,14 @@ export const useVirtualization = <T extends { id: number | string; width: number
 			if (!containerRef.current) return;
 
 			const container = containerRef.current;
-			const scrollTop = window.scrollY;
-			const viewportHeight = window.innerHeight;
 			const buffer = 200;
 
+			const isContainerScrollable = container.scrollHeight > container.clientHeight;
+			const scrollTop = isContainerScrollable ? container.scrollTop : window.scrollY;
+			const viewportHeight = isContainerScrollable ? container.clientHeight : window.innerHeight;
+
 			const containerRect = container.getBoundingClientRect();
-			const containerTop = scrollTop + containerRect.top;
+			const containerTop = isContainerScrollable ? 0 : scrollTop + containerRect.top;
 
 			const newVisibleItems = positionedItemsRef.current.filter((item) => {
 				const itemTop = containerTop + item.top;
@@ -50,17 +54,11 @@ export const useVirtualization = <T extends { id: number | string; width: number
 				);
 			});
 
-			setVisibleItems((prevVisibleItems) => {
-				const prevIds = prevVisibleItems.map((item) => item.id).join(',');
-				const newIds = newVisibleItems.map((item) => item.id).join(',');
-				if (prevIds === newIds) {
-					return prevVisibleItems;
-				}
-				return newVisibleItems;
-			});
+			setVisibleItems(newVisibleItems);
+
+			scrollRafRef.current = null;
 		});
 	}, [containerRef]);
-
 
 	const updateLayout = useCallback(() => {
 		if (!containerRef.current) return;
@@ -86,7 +84,7 @@ export const useVirtualization = <T extends { id: number | string; width: number
 			columnHeights[shortestColumnIndex] += itemHeight + gap;
 
 			return {
-				id: item.id || index,
+				id: item.id != null ? item.id : index,
 				data: item,
 				left,
 				top,
@@ -105,20 +103,27 @@ export const useVirtualization = <T extends { id: number | string; width: number
 		handleScroll();
 	}, [items, containerRef, gap, totalHeight, handleScroll]);
 
-	useEffect(() => {
+	useLayoutEffect(() => {
 		updateLayout();
 
+		if (containerRef.current) {
+			containerRef.current.addEventListener('scroll', handleScroll);
+		}
 		window.addEventListener('scroll', handleScroll);
 		window.addEventListener('resize', updateLayout);
 
+		const targetContainer = containerRef.current;
 		return () => {
+			if (targetContainer) {
+				targetContainer.removeEventListener('scroll', handleScroll);
+			}
 			window.removeEventListener('scroll', handleScroll);
 			window.removeEventListener('resize', updateLayout);
 			if (scrollRafRef.current !== null) {
 				cancelAnimationFrame(scrollRafRef.current);
 			}
 		};
-	}, [updateLayout, handleScroll]);
+	}, [updateLayout, handleScroll, containerRef]);
 
 	return { visibleItems, totalHeight };
-}
+};

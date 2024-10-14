@@ -53,7 +53,7 @@ export const MasonryGrid: React.FC<MasonryGridProps> = React.memo(
     const renderedItems = useMemo(
       () =>
         visibleItems.map((item) => (
-          <MemoizedMasonryItem key={item.id} item={item} />
+          <MemoizedMasonryItem key={item.data.uid} item={item} />
         )),
       [visibleItems]
     );
