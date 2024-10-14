@@ -54,7 +54,7 @@ Masonry layotu created with Vite+React+TS.
 
 The masonry grid is implemented using a custom virtualization technique to ensure smooth performance with large datasets. Key aspects include:
 
-- Calculation of visible items based on scroll position using IntersectionObserver
+- Calculation of visible items based on scroll position 
 - Dynamic rendering of only visible images
 - Efficient update of item positions on resize events
 
